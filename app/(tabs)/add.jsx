@@ -1,145 +1,173 @@
 import { Image } from 'expo-image';
-import { Platform, Pressable, StyleSheet } from 'react-native';
-import { ScrollView, Text, View } from 'react-native';
-
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
-import { Button } from 'react-native-web';
+import { Pressable, StyleSheet, ScrollView, Text, View } from 'react-native';
 import { useState } from 'react';
+import { router } from 'expo-router';
 import ExpenseForm from '@/components/ExpenseForm';
 import IncomeForm from '@/components/IncomeForm';
-import { router } from 'expo-router';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function Add() {
-    const [isExpense, setIsExpense] = useState(true);
-    return (
-        <ScrollView>
-            <View style={styles.container}>
-                <View style={styles.headerSection}>
-                    <Pressable style={styles.backBtn} onPress={() => router.back()}>
-                        <Image source={require("../../assets/images/back.png")}
-                            style={styles.backImage}
-                        ></Image>
-                    </Pressable>
-                    <Text style={styles.transactionText}>Add Transaction</Text>
-                </View>
-                <View style={styles.transactionsButtons}>
-                    <Pressable
-                        style={[
-                            styles.transactionButton,
-                            isExpense && styles.activeButton,
-                        ]}
-                        onPress={() => setIsExpense(true)}
-                    >
-                        <Text
-                            style={[
-                                styles.buttonText,
-                                isExpense && styles.activeText,
-                            ]}
-                        >
-                            Expense
-                        </Text>
-                    </Pressable>
+  const [isExpense, setIsExpense] = useState(true);
+  const { themeName } = useTheme();
+  const currentTheme = themeName === "dark" ? theme.dark : theme.light;
 
-                    <Pressable
-                        style={[
-                            styles.transactionButton,
-                            !isExpense && styles.activeButton,
-                        ]}
-                        onPress={() => setIsExpense(false)}
-                    >
-                        <Text
-                            style={[
-                                styles.buttonText,
-                                !isExpense && styles.activeText,
-                            ]}
-                        >
-                            Income
-                        </Text>
-                    </Pressable>
-                </View>
+  return (
+    <ScrollView
+      style={{ backgroundColor: currentTheme.bg }}
+      contentContainerStyle={{ paddingBottom: 40 }}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={[styles.container, { backgroundColor: currentTheme.bg }]}>
+
+        {/* 🔹 Header */}
+        <View style={styles.headerSection}>
+          <Pressable style={styles.backBtn} onPress={() => router.back()}>
+            <Image
+              source={require("../../assets/images/back.png")}
+              style={[styles.backImage, { tintColor: currentTheme.text }]}
+            />
+          </Pressable>
+
+          <Text style={[styles.transactionText, { color: currentTheme.text }]}>
+            Add Transaction
+          </Text>
+        </View>
+
+        {/* 🔹 Toggle Buttons */}
+        <View
+          style={[
+            styles.transactionsButtons,
+            { backgroundColor: currentTheme.card }
+          ]}
+        >
+          <Pressable
+            style={[
+              styles.transactionButton,
+              isExpense && { backgroundColor: currentTheme.primary },
+            ]}
+            onPress={() => setIsExpense(true)}
+          >
+            <Text
+              style={[
+                styles.buttonText,
                 {
-                    isExpense ?
-                        <View style={styles.formContainer}><ExpenseForm /></View>
-                        : <View style={styles.formContainer}><IncomeForm /></View>
-                }
-            </View>
-        </ScrollView>
-    );
+                  color: isExpense
+                    ? "#fff"
+                    : currentTheme.text,
+                },
+              ]}
+            >
+              Expense
+            </Text>
+          </Pressable>
+
+          <Pressable
+            style={[
+              styles.transactionButton,
+              !isExpense && { backgroundColor: currentTheme.primary },
+            ]}
+            onPress={() => setIsExpense(false)}
+          >
+            <Text
+              style={[
+                styles.buttonText,
+                {
+                  color: !isExpense
+                    ? "#fff"
+                    : currentTheme.text,
+                },
+              ]}
+            >
+              Income
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* 🔹 Form Card */}
+        <View
+          style={[
+            styles.formContainer,
+            { backgroundColor: currentTheme.card }
+          ]}
+        >
+          {isExpense ? <ExpenseForm /> : <IncomeForm />}
+        </View>
+      </View>
+    </ScrollView>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "white",
-        padding: 40,
-    },
-
-    headerSection: {
-        width: "100%",
-        height: 50,
-        justifyContent: "center",
-        alignItems: "center",
-        marginBottom: 20,
-        marginTop: 20,
-    },
-
-    backImage: {
-        width: 30,
-        height: 30,
-        marginRight: 10,
-    },
-
-    backBtn: {
-    position: "absolute", 
-    left: 0,
-    right:10
+  container: {
+    flex: 1,
+    paddingHorizontal: 20,
+    padding: 25,
   },
 
+  headerSection: {
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 25,
+    // marginTop: 20,
+  },
 
-    transactionText: {
-        fontSize: 20,
-        fontWeight: "bold",
-        color: "black",
-        textAlign: "center",
-    },
+  backBtn: {
+    position: "absolute",
+    left: 0,
+    padding: 5,
+  },
 
-    transactionsButtons: {
-        flexDirection: "row",
-        width: "100%", // ✅ FIXED
-        backgroundColor: "#f0f0f0",
-        borderRadius: 50,
-        padding: 5,
-    },
+  backImage: {
+    width: 26,
+    height: 26,
+  },
 
-    transactionButton: {
-        flex: 1, // ✅ VERY IMPORTANT
-        paddingVertical: 12,
-        borderRadius: 50,
-        alignItems: "center",
-    },
+  transactionText: {
+    fontSize: 20,
+    fontWeight: "700",
+  },
 
-    activeButton: {
-        backgroundColor: "#4CAF50",
-    },
+  transactionsButtons: {
+    flexDirection: "row",
+    borderRadius: 50,
+    padding: 5,
+    marginBottom: 25,
+  },
 
-    buttonText: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: "#333",
-    },
+  transactionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 50,
+    alignItems: "center",
+  },
 
-    activeText: {
-        color: "#fff",
-    },
+  buttonText: {
+    fontSize: 15,
+    fontWeight: "600",
+  },
 
-    formContainer: {
-        marginTop: 30,
-        width: "100%",
-    },
+  formContainer: {
+    borderRadius: 16,
+    padding: 15,
+    elevation: 3, // Android shadow
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+  },
 });
+
+const theme = {
+  light: {
+    bg: "#f9fafb",
+    card: "#ffffff",
+    text: "#111",
+    primary: "#4CAF50",
+  },
+  dark: {
+    bg: "#121212",
+    card: "#1e1e1e",
+    text: "#ffffff",
+    primary: "#4CAF50",
+  },
+};

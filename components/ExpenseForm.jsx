@@ -7,13 +7,20 @@ import {
   StyleSheet,
   Pressable,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../context/ThemeContext";
 
 export default function ExpenseForm() {
   const router = useRouter();
+  const { themeName } = useTheme();
+  const currentTheme = themeName === "dark" ? theme.dark : theme.light;
 
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
@@ -58,87 +65,134 @@ export default function ExpenseForm() {
   }, []);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.card}>
+    <>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+         <ScrollView
+                contentContainerStyle={[
+                  styles.container,
+                  { backgroundColor: currentTheme.bg },
+                ]}
+                showsVerticalScrollIndicator={false}
+              >
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: currentTheme.card },
+              ]}
+            >
 
-        {/* Amount */}
-        <View style={styles.amountContainer}>
-          <Text style={styles.rupee}>₹</Text>
-          <TextInput
-            value={amount}
-            onChangeText={setAmount}
-            keyboardType="numeric"
-            placeholder="0"
-            placeholderTextColor="#aaa"
-            style={styles.amountInput}
-          />
-        </View>
-        {errors.amount && <Text style={styles.error}>{errors.amount}</Text>}
+              {/* Amount */}
+              <View style={styles.amountContainer}>
+                <Text style={[styles.rupee, { color: currentTheme.text }]}>₹</Text>
 
-        {/* Note */}
-        <TextInput
-          value={note}
-          onChangeText={setNote}
-          placeholder="Add note"
-          placeholderTextColor="#aaa"
-          style={styles.input}
-        />
-        {errors.note && <Text style={styles.error}>{errors.note}</Text>}
+                <TextInput
+                  value={amount}
+                  onChangeText={setAmount}
+                  keyboardType="numeric"
+                  placeholder="0"
+                  placeholderTextColor={currentTheme.subText}
+                  style={[
+                    styles.amountInput,
+                    { color: currentTheme.text },
+                  ]}
+                />
+              </View>
+              {errors.amount && <Text style={styles.error}>{errors.amount}</Text>}
 
-        {/* Date */}
-        <Pressable style={styles.dateBtn} onPress={() => setShow(true)}>
-          <Text style={{ color: date ? "#000" : "#aaa" }}>
-            {date ? date.toDateString() : "Select Date"}
-          </Text>
-        </Pressable>
-        {errors.date && <Text style={styles.error}>{errors.date}</Text>}
+              {/* Note */}
+              <TextInput
+                value={note}
+                onChangeText={setNote}
+                placeholder="Add note"
+                placeholderTextColor={currentTheme.subText}
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: currentTheme.inputBg,
+                    color: currentTheme.text,
+                  },
+                ]}
+              />
+              {errors.note && <Text style={styles.error}>{errors.note}</Text>}
 
-        {show && (
-          <DateTimePicker
-            value={date || new Date()}
-            mode="date"
-            display="default"
-            onChange={(event, selectedDate) => {
-              setShow(false);
-              if (selectedDate) setDate(selectedDate);
-            }}
-          />
-        )}
+              {/* Date */}
+              <Pressable
+                style={[
+                  styles.dateBtn,
+                  { backgroundColor: currentTheme.inputBg },
+                ]}
+                onPress={() => setShow(true)}
+              >
+                <Text
+                  style={{
+                    color: date
+                      ? currentTheme.text
+                      : currentTheme.subText,
+                  }}
+                >
+                  {date ? date.toDateString() : "Select Date"}
+                </Text>
+              </Pressable>
 
-        {/* Next Button */}
-        <Pressable
-          style={[styles.nextButton, isLoading && styles.disabledButton]}
-          onPress={handleNext}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <>
-              <Text style={styles.nextText}>Next</Text>
-              <Ionicons name="arrow-forward" size={16} color="#fff" />
-            </>
-          )}
-        </Pressable>
+              {errors.date && <Text style={styles.error}>{errors.date}</Text>}
 
-      </View>
-    </ScrollView>
+              {show && (
+                <DateTimePicker
+                  value={date || new Date()}
+                  mode="date"
+                  display="default"
+                  onChange={(event, selectedDate) => {
+                    setShow(false);
+                    if (selectedDate) setDate(selectedDate);
+                  }}
+                />
+              )}
+
+              {/* Button */}
+              <Pressable
+                style={[
+                  styles.nextButton,
+                  { backgroundColor: currentTheme.primary },
+                  isLoading && styles.disabledButton,
+                ]}
+                onPress={handleNext}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <>
+                    <Text style={styles.nextText}>Next</Text>
+                    <Ionicons name="arrow-forward" size={16} color="#fff" />
+                  </>
+                )}
+              </Pressable>
+
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView >
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    justifyContent: "center",
-    backgroundColor: "#f8f9fb",
-    padding: 20,
-  },
-
+ container: {
+  flexGrow: 1,
+  justifyContent: "flex-start", // 👈 not center
+  padding: 20,
+},
   card: {
-    backgroundColor: "#fff",
     borderRadius: 20,
     padding: 20,
     elevation: 5,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
 
   amountContainer: {
@@ -164,21 +218,17 @@ const styles = StyleSheet.create({
     textAlign: "center",
     padding: 15,
     borderRadius: 12,
-    // backgroundColor: "#f5f5f5",
     marginTop: 15,
   },
 
   dateBtn: {
-    textAlign: "center",
     padding: 15,
     borderRadius: 12,
-    // backgroundColor: "#f5f5f5",
     alignItems: "center",
     marginTop: 15,
   },
 
   nextButton: {
-    backgroundColor: "#4CAF50",
     padding: 16,
     borderRadius: 30,
     alignItems: "center",
@@ -194,11 +244,33 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
+  disabledButton: {
+    opacity: 0.6,
+  },
+
   error: {
-    color: "red",
+    color: "#ff4d4f",
     fontSize: 12,
     marginTop: 5,
-    marginLeft: 5,
     textAlign: "center",
   },
 });
+
+const theme = {
+  light: {
+    bg: "#f9fafb",
+    card: "#ffffff",
+    text: "#111",
+    subText: "#888",
+    inputBg: "#f3f4f6",
+    primary: "#4CAF50",
+  },
+  dark: {
+    bg: "#121212",
+    card: "#1e1e1e",
+    text: "#ffffff",
+    subText: "#aaa",
+    inputBg: "#2a2a2a",
+    primary: "#4CAF50",
+  }
+}

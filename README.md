@@ -18,7 +18,7 @@ You can download and install the app using the APK below:
 👉 Download APK
 
 ```
-https://tinyurl.com/my-first-app
+https://bit.ly/eit-app
 ``` 
 
 #### 🛠️ Tech Stack
